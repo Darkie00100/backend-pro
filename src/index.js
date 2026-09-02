@@ -1,19 +1,20 @@
 import dns from "dns";
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
-import dotenv from "dotenv";
-dotenv.config();
-import connectDB from "./db/dindex.js"
-import {app} from "./app.js"
+import "dotenv/config";
+
+import connectDB from "./db/dindex.js";
+import { app } from "./app.js";
+
 connectDB()
-.then(()=>{
-    app.listen(process.env.PORT,()=>{
-        console.log(`App is listening at port ${process.env.PORT}`)
+    .then(() => {
+        app.listen(process.env.PORT, () => {
+            console.log(`App is listening at ${process.env.PORT}`);
+        });
     })
-})
-.catch((error)=>{
-    console.log("MongoDB connection Failed!!  ",error);
-})
+    .catch((error) => {
+        console.log("MongoDB connection Failed!! ", error);
+    });
 /*
 import mongoose from "mongoose";
 import {DB_NAME} from "./constant.js";
