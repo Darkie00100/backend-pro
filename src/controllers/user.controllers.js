@@ -11,7 +11,7 @@ const generateAccessRefreshTocken = async (userid) => {
     const accessTokens = await user.generateAccessToken();
     const refreshTokens = await user.generateRequiredToken();
     user.refreshTokens = refreshTokens;
-    await user.save({validationBeforeSave:false});
+    await user.save({validateBeforeSave:false});
     return {accessTokens,refreshTokens}
   } 
   
@@ -94,7 +94,7 @@ const login = asyncHandler(async (req,res)=>{
       $or: [{userName},{email}]
     })
 
-   const isPasswordValid = await User.passwordCheck(password);
+   const isPasswordValid = await user.passwordCheck(password);
    if (!isPasswordValid) {
     throw new ApiError(404,"incorrect password");
    }
@@ -109,7 +109,7 @@ const login = asyncHandler(async (req,res)=>{
    }
 
    return res.status(200)
-   .cookie("accesstokens",accessTokens,options)
+   .cookie("accessTokens",accessTokens,options)
    .cookie("refreshTokens",refreshTokens,options)
    .json(
     new ApiResponse(200,{logedinUser,accessTokens,refreshTokens},
@@ -119,11 +119,11 @@ const login = asyncHandler(async (req,res)=>{
    })
 
 const logout = asyncHandler(async (req,res) => {
-  await User.findById(
+  await User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: {
-        refreshTokens: undefined
+      $unset: {
+        refreshTokens: 1
       }
     },  
         {
@@ -144,8 +144,114 @@ const logout = asyncHandler(async (req,res) => {
     new ApiResponse(200,{},"User loged out Successfully")
   )
 })
+
+const changePassword = asyncHandler(async (req,res) => {
+  const {oldPassword,newPassword} = req.body;
+  const user = await User.findById(req.user?._id);
+
+  const correctPassword = await user.isPasswordValid(oldPassword);
+  if (!correctPassword) {
+    throw new ApiError(400,"Invalid oldPassword");
+  }
+
+   user.password = newPassword;
+  await user.save({validateBeforeSave:false})
+
+  return res.status(200)
+  .json(new ApiResponse(200,{},"Password changed successfully"))
+})
+const getUser = asyncHandler(async (req,res) => {
+  return res.status(200)
+  .json(new ApiResponse(200,req.user,"User fetched Succesfully"));
+})
+const updateUserDetailes = asyncHandler(async (req,res) => {
+  const {fullName,email} = req.body;
+
+  if (!(fullName||email)) {
+    throw new ApiError(401,"field are required")
+  }
+ 
+  const updateFields = {}
+  if(fullName){updateFields.fullName = fullName}
+   if(email){
+     const existEmail = await User.findOne({
+     email,
+     _id: { $ne: req.user?._id }
+    });
+
+   if (existEmail) {
+    throw new ApiError(400,"Email already exit")
+   }
+
+    updateFields.email = email
+  }
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: updateFields
+    },{new:true}
+  ).select("-password")
+
+  return res.status(200)
+  .json(new ApiResponse(200,user,"User detiles updated"))
+})
+const updateAvatar = asyncHandler(async (req,res) => {
+  const avatarLocalPath = req.file?.path;
+
+  if (!avatarLocalPath) {
+    throw new ApiError(400,"invalid avatar localpath")
+  }
+
+  const avatar = await uplodeOnCloudeinary(avatarLocalPath);
+  if (!avatar.url) {
+    throw new ApiError(500,"error while uploading avatar")
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set:{
+        avatar:avatar.url
+      }
+    },
+    {new:true}
+  ).select("-password")
+
+  return res.status(200)
+  .json(new ApiResponse(201,user,"User avatar updated successfully"))
+})
+const updateCoverImage = asyncHandler(async (req,res) => {
+  const coverImageLocalPath = req.file?.path;
+
+  if (!coverImageLocalPath) {
+    throw new ApiError(401,"invalid coverImage Localpath")
+  }
+
+  const coverImage = await uplodeOnCloudeinary(coverImageLocalPath)
+  if (!coverImage) {
+    throw new ApiError(500,"Error while uploading coverImage")
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set:{
+        coverImage:coverImage.url
+      }
+    },
+    {new:true}
+  ).select("-password")
+
+  return res.status(200)
+  .json(new ApiResponse(201,user,"User coverImage updated successfully"))
+})
 export {
   registerUser,
   login,
-  logout
+  logout,
+  changePassword,
+  getUser,
+  updateUserDetailes,
+  updateAvatar,
+  updateCoverImage
 }
