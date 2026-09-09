@@ -96,7 +96,7 @@ const login = asyncHandler(async (req,res)=>{
       $or: [{userName},{email}]
     })
 
-    if (!user) {
+    if (!user) {//this was missing and was causing error bcz we were never checking does the user exist or not
       throw new ApiError(400,"Invalide credentials")
     }
    const isPasswordValid = await user.passwordCheck(password);
