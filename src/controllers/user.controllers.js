@@ -151,7 +151,7 @@ const logout = asyncHandler(async (req,res) => {
   )
 })
 const refreshAcesstokens = asyncHandler(async (req,res) => {
-  const incomingRefreshToken = req.cookie.refreshTokens||req.body.refreshTokens;
+  const incomingRefreshToken = req.cookies?.refreshTokens||req.body.refreshTokens;
 
   if (!incomingRefreshToken) {
     throw new ApiError(400,"Unauthorized request")
@@ -162,7 +162,7 @@ const refreshAcesstokens = asyncHandler(async (req,res) => {
     process.env.REQUIRED_TOCKEN_SECRATE
   )
 
-  const user = User.findById(decodedToken?._id);
+  const user = await User.findById(decodedToken?._id);
 
   if (!user) {
     throw new ApiError(400,"Unauthorized request");
@@ -177,9 +177,11 @@ const refreshAcesstokens = asyncHandler(async (req,res) => {
     secure: true
   }
 
-  const {accessTokens,newRefreshTokens} = await generateAccessRefreshTocken(user_id);
+  const {accessTokens,refreshTokens:newRefreshTokens} = await generateAccessRefreshTocken(user._id);
 
   return res.status(200)
+    .cookie("accessToken", accessTokens, options)
+    .cookie("refreshToken", newRefreshTokens, options)
   .json(new ApiResponse(200,{accessTokens,refreshTokens:newRefreshTokens},"Access token refreshed"))
 })
 const changePassword = asyncHandler(async (req,res) => {
@@ -314,10 +316,10 @@ const getUserChannelProfile = asyncHandler(async (req,res) => {
     {
       $addFields:{
         subscribersCount:{
-          $size: "subscribers"
+          $size: "$subscribers"
         },
         channelCount:{
-          $size:"subscribedTo"
+          $size:"$subscribedTo"
         },
         isSubscribed:{
           $cond:{
