@@ -4,6 +4,7 @@ import {ApiResponse} from "../utils/ApiResponse.js";
 import {uplodeOnCloudeinary} from "../utils/cloudeinary.js";
 import {User} from "../models/user.model.js";
 import mongoose, { set } from "mongoose";
+import jwt from "jsonwebtoken";
 
 const generateAccessRefreshTocken = async (userid) => {
   try {
@@ -149,7 +150,38 @@ const logout = asyncHandler(async (req,res) => {
     new ApiResponse(200,{},"User loged out Successfully")
   )
 })
+const refreshAcesstokens = asyncHandler(async (req,res) => {
+  const incomingRefreshToken = req.cookie.refreshTokens||req.body.refreshTokens;
 
+  if (!incomingRefreshToken) {
+    throw new ApiError(400,"Unauthorized request")
+  }
+
+  const decodedToken = jwt.verify(
+    incomingRefreshToken,
+    process.env.REQUIRED_TOCKEN_SECRATE
+  )
+
+  const user = User.findById(decodedToken?._id);
+
+  if (!user) {
+    throw new ApiError(400,"Unauthorized request");
+  }
+
+  if (incomingRefreshToken!==user?.refreshTokens) {
+    throw new ApiError(400,"Refresh token expired")
+  }
+
+  const options = {
+    httpOnly:true,
+    secure: true
+  }
+
+  const {accessTokens,newRefreshTokens} = await generateAccessRefreshTocken(user_id);
+
+  return res.status(200)
+  .json(new ApiResponse(200,{accessTokens,refreshTokens:newRefreshTokens},"Access token refreshed"))
+})
 const changePassword = asyncHandler(async (req,res) => {
   const {oldPassword,newPassword} = req.body;
   const user = await User.findById(req.user?._id);
@@ -366,6 +398,7 @@ export {
   registerUser,
   login,
   logout,
+  refreshAcesstokens,
   changePassword,
   getUser,
   updateUserDetailes,
