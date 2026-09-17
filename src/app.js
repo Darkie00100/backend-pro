@@ -17,10 +17,16 @@ app.use(cookieParser()); // 👈 I MISSING THIS so the cookie were saying undefi
 //import Router
 import userRouter from "./routes/user.routes.js"
 import serverRouter from "./routes/healthcheck.routes.js"
+import tweetRouter from "./routes/tweet.routes.js"
 // Router declaration
 app.use("/user",userRouter);
 // http://localhost:3000/user/register
 
 app.use("/server",serverRouter)
 // http://localhost:3000/server/health-check
+
+app.use("/tweets",tweetRouter);
+//http://localhost:3000/tweets/createTweet 
+/*(use the tweets methods in its controller)  
+createTweet, getUserTweets, updateTweet, deleteTweet */
 export {app};
