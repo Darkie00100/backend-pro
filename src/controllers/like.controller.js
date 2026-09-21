@@ -7,22 +7,112 @@ import {asyncHandler} from "../utils/asyncHandler.js"
 const toggleVideoLike = asyncHandler(async (req, res) => {
     const {videoId} = req.params
     //TODO: toggle like on video
+    if (!isValidObjectId(videoId)) {
+        throw new ApiError(401,"invalid video")
+    }
+
+    if (!isValidObjectId(req.user?._id)) {
+        throw new ApiError(401,"invalid user")
+    }
+
+    const existLike = await Like.findOne(
+        {
+            likedBy: req.user?._id,
+            video : videoId
+        }
+    )
+
+    if (!existLike) {
+        const like = await Like.create({
+            likedBy: req.user?._id,
+            video : videoId
+        })
+
+        return res.status(200)
+        .json(new ApiResponse(200,like,"video liked successfully"))
+    }
+
+    const deletedLike = await Like.findByIdAndDelete(existLike._id);
+
+    return res.status(200)
+    .json(new ApiResponse(200,deletedLike,"video unliked successfully"))
 })
 
 const toggleCommentLike = asyncHandler(async (req, res) => {
     const {commentId} = req.params
     //TODO: toggle like on comment
+    if (!isValidObjectId(commentId)) {
+        throw new ApiError(401,"invalid comment!...")
+    }
 
+    if (!isValidObjectId(req.user?._id)) {
+        throw new ApiError(401,"invalid User Login!...")
+    }
+
+    const existCommentLike = await Like.findOne({
+        comment: commentId,
+        likedBy: req.user?._id
+    })
+
+    if (!existCommentLike) {
+        const commentLike = await Like.create({
+            likedBy: req.user?._id,
+            comment: commentId
+        })
+
+        return res.status(200)
+        .json(new ApiResponse(200,commentLike,"comment is liked succussfully"))
+    }
+
+    const deleteCommentLike = await Like.findByIdAndDelete(existCommentLike._id)
+
+    return res.status(200)
+    .json(new ApiResponse(200,deleteCommentLike,"comment like is deleted successfully"))
 })
 
 const toggleTweetLike = asyncHandler(async (req, res) => {
     const {tweetId} = req.params
     //TODO: toggle like on tweet
-}
-)
+    if (!isValidObjectId(tweetId)) {
+        throw new ApiError(401,"invalid tweet id!...")
+    }
+
+    if (!isValidObjectId(req.user?._id)) {
+        throw new ApiError(401,"Inavlid user Login!...")
+    }
+
+    const existTweetLike  = await Like.findOne({
+        likedBy : req.user._id,
+        tweet : tweetId
+    })
+
+    if (!existTweetLike) {
+        const tweetLike  = await Like.create({
+            tweet : tweetId,
+            likedBy : req.user._id
+        })
+
+        return res.status(200)
+        .json(new ApiResponse(200,tweetLike,"tweet liked successfully"))
+    }
+
+    const deleteTweetLike = await Like.findByIdAndDelete(existTweetLike._id)
+
+    return res.status(200)
+    .json(new ApiResponse(200,deleteTweetLike,"tweet like deleted Successfully"))
+})
 
 const getLikedVideos = asyncHandler(async (req, res) => {
     //TODO: get all liked videos
+    if (!isValidObjectId(req.user?._id)) {
+        throw new ApiError(401,"Invalid User Login!...")
+    }
+    const likeVideos = await Like.find({
+        likedBy:req.user._id
+    }).populate("video")
+
+    return res.status(200)
+    .json(new ApiResponse(200,likeVideos,"all liked videos fetched successfully"))
 })
 
 export {
