@@ -19,6 +19,8 @@ import userRouter from "./routes/user.routes.js"
 import serverRouter from "./routes/healthcheck.routes.js"
 import tweetRouter from "./routes/tweet.routes.js"
 import likeRouter from "./routes/like.routes.js"
+import subscriptionRouter from "./routes/subscription.routes.js"
+
 // Router declaration
 app.use("/user",userRouter);
 // http://localhost:3000/user/register
@@ -33,4 +35,6 @@ createTweet, getUserTweets, updateTweet, deleteTweet */
 
 app.use("/likes",likeRouter)
 
+
+app.use("/subscription",subscriptionRouter)
 export {app};
