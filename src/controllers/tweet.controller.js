@@ -44,7 +44,7 @@ const updateTweet = asyncHandler(async (req, res) => {
     if (!tweet) {
         throw new ApiError(404,"Tweet not found")
     }
-    if (tweet.owner!=req.user?._id) {
+    if (tweet.owner.toString()!=req.user?._id.toString()) {
         throw new ApiError(403,"You cannot update Others Tweets!...")
     }
     // 401 = unauthorized ; 403 = authorized but u r not the owner
@@ -64,7 +64,7 @@ const updateTweet = asyncHandler(async (req, res) => {
 const deleteTweet = asyncHandler(async (req, res) => {
     //TODO: delete tweet
     const tweet = await Tweet.findById(req.params?.tweetId)
-        if (tweet.owner!=req.user?._id) {
+        if (tweet.owner.toString()!=req.user?._id.toString()) {
         throw new ApiError(403,"You cannot delete Others Tweets!...")
     }
     if (!isValidObjectId(req.params.tweetId)) {
