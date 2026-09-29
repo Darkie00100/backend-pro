@@ -22,6 +22,7 @@ import likeRouter from "./routes/like.routes.js"
 import subscriptionRouter from "./routes/subscription.routes.js"
 import playlistRouter from "./routes/playlist.routes.js"
 import dashboradRouter from "./routes/dashboard.routes.js"
+import commentRouter from "./routes/comment.routes.js"
 // Router declaration
 app.use("/user",userRouter);
 // http://localhost:3000/user/register
@@ -58,4 +59,8 @@ app.use("/playlist",playlistRouter)
 app.use("/dashboard",dashboradRouter)
 //http://localhost:3000/dashboard/createTweet
 /*getChannelStats, getChannelVideos*/
+
+app.use("/Comments",commentRouter)
+//http://localhost:3000/comments/
+
 export {app};
