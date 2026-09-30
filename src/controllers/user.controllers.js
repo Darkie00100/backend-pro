@@ -29,7 +29,7 @@ console.log("CONTENT TYPE:", req.headers["content-type"]);
     console.log("BODY:", req.body);
 
    const {fullName,email,userName,password} =req.body
-   console.log("email: ",email);
+   //console.log("email: ",email);
 
    if ([fullName,email,userName,password].some(
     (field)=>field?.trim() === "")
@@ -54,9 +54,9 @@ console.log("CONTENT TYPE:", req.headers["content-type"]);
     throw new ApiError(400,"Avatar is required");
    }
 
-  const avatar = await uplodeOnCloudeinary(avatarLocalPath);const coverImage = coverImageLocalPath
-    ? await uplodeOnCloudeinary(coverImageLocalPath)
-    : null;
+  const avatar = await uplodeOnCloudeinary(avatarLocalPath);
+  const coverImage = coverImageLocalPath? await uplodeOnCloudeinary(coverImageLocalPath): null;
+    
   
   if (!avatar) {
     throw new ApiError(400,"Avatar is required");

@@ -23,6 +23,7 @@ import subscriptionRouter from "./routes/subscription.routes.js"
 import playlistRouter from "./routes/playlist.routes.js"
 import dashboradRouter from "./routes/dashboard.routes.js"
 import commentRouter from "./routes/comment.routes.js"
+import videoRouter from "./routes/video.route.js"
 // Router declaration
 app.use("/user",userRouter);
 // http://localhost:3000/user/register
@@ -32,35 +33,24 @@ app.use("/server-health",serverRouter)
 
 app.use("/tweets",tweetRouter);
 //http://localhost:3000/tweets/createTweet 
-/*(use the tweets methods in its controller)  
-createTweet, getUserTweets, updateTweet, deleteTweet */
+
 
 app.use("/likes",likeRouter)
 //http://localhost:3000/likes/createTweet 
-/*toggleCommentLike,
-    toggleTweetLike,
-    toggleVideoLike,
-    getLikedVideos*/
 
 app.use("/subscription",subscriptionRouter)
 //http://localhost:3000/subscription/createTweet 
-/*toggleSubscription,
-    getUserChannelSubscribers,
-    getSubscribedChannels*/
+
 app.use("/playlist",playlistRouter)
 //http://localhost:3000/playlist/createTweet
-/*createPlaylist,
-    getUserPlaylists,
-    getPlaylistById,
-    addVideoToPlaylist,
-    removeVideoFromPlaylist,
-    deletePlaylist,
-    updatePlaylist*/
+
 app.use("/dashboard",dashboradRouter)
 //http://localhost:3000/dashboard/createTweet
-/*getChannelStats, getChannelVideos*/
+
 
 app.use("/Comments",commentRouter)
 //http://localhost:3000/comments/
 
+app.use("/video",videoRouter)
+//http://localhost:3000/video
 export {app};
